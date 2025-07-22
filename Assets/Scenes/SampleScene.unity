@@ -1331,29 +1331,33 @@ MonoBehaviour:
     message:
     - Hey!
     - Im Sawi
-    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 0}
+    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 1}
     speakerImage: {fileID: 21300000, guid: 5480ac3eeaafc244fa96d893c1eae1f1, type: 3}
     preConditions: []
+    hasBeenCompleted: 0
   - speakerName: Sawi
     message:
     - This is a testing text!
-    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 0}
+    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 1}
     speakerImage: {fileID: 21300000, guid: 5480ac3eeaafc244fa96d893c1eae1f1, type: 3}
     preConditions: []
+    hasBeenCompleted: 0
   - speakerName: Sawi
     message:
     - This has three text
     - Maybe?
     - IDK man, Im hunger
-    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 0}
+    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 1}
     speakerImage: {fileID: 21300000, guid: 5480ac3eeaafc244fa96d893c1eae1f1, type: 3}
     preConditions: []
+    hasBeenCompleted: 0
   - speakerName: Sawi
     message:
     - Bye!
-    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 0}
+    speakerColor: {r: 0.6886792, g: 0.016242431, b: 0.46193054, a: 1}
     speakerImage: {fileID: 21300000, guid: 5480ac3eeaafc244fa96d893c1eae1f1, type: 3}
     preConditions: []
+    hasBeenCompleted: 0
 --- !u!1 &1361188752
 GameObject:
   m_ObjectHideFlags: 0
