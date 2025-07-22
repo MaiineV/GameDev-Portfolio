@@ -13,16 +13,17 @@ namespace Player
         private Rigidbody _rigidbody;
         private InteractComponent _interactComponent;
 
-        [Header("Movement Variables")] [SerializeField]
-        private float _speed;
+        [Header("Movement Variables")] 
+        [SerializeField] private float speed;
         private Vector3 _actualVelocity;
+        private bool _canMove = true;
 
         [Header("Jump Variables")] [SerializeField]
         private float _jumpForce;
 
         [SerializeField] private float _jumpDelay = .2f;
         [SerializeField] private Vector3 _feetOffset;
-        private Vector3 _featPosition => transform.position + _feetOffset;
+        private Vector3 FeatPosition => transform.position + _feetOffset;
         private bool _recentlyJumped = false;
         private float _jumpTimer;
         
@@ -30,15 +31,20 @@ namespace Player
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody>();
-            _interactComponent = new InteractComponent();
+            _interactComponent = GetComponent<InteractComponent>();
 
-            ControllerManager.AddPerformanceEvent(InputType.Move, OnMove);
-            ControllerManager.AddCancelEvent(InputType.Move, OnMove);
-            ControllerManager.AddPerformanceEvent(InputType.Jump, OnJump);
+            ControllerManager.AddPerformanceEvent(InputNames.Move, OnMove);
+            ControllerManager.AddCancelEvent(InputNames.Move, OnMove);
+            ControllerManager.AddPerformanceEvent(InputNames.Jump, OnJump);
+            ControllerManager.AddPerformanceEvent(InputNames.Interact, OnInteract);
+            
+            EventManager.Subscribe(EventName.OnPlayerResetMovement, OnPlayerResetMovement);
         }
 
         private void Update()
         {
+            if (!_canMove) return;
+            
             UpdateJumpDelay();
             
             _actualVelocity.y = _rigidbody.linearVelocity.y;
@@ -51,14 +57,14 @@ namespace Player
         {
             var dir = context.ReadValue<Vector2>();
             dir.Normalize();
-            dir *= _speed;
+            dir *= speed;
 
             _actualVelocity = new Vector3(dir.x, _rigidbody.linearVelocity.y, dir.y);
         }
 
         private void OnJump(InputAction.CallbackContext context)
         {
-            if (!IsGrounded()) return;
+            if (!_canMove || !IsGrounded()) return;
 
             _rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Impulse);
             _recentlyJumped = true;
@@ -67,7 +73,10 @@ namespace Player
 
         private void OnInteract(InputAction.CallbackContext context)
         {
-            _interactComponent.TryInteract();
+            if (_interactComponent.TryInteract())
+            {
+                _canMove = false;
+            }
         }
 
         #endregion
@@ -76,7 +85,7 @@ namespace Player
         {
             if (_recentlyJumped) return false;
 
-            return Physics.Raycast(_featPosition, Vector3.down, 0.2f,
+            return Physics.Raycast(FeatPosition, Vector3.down, 0.2f,
                 LayerMask.GetMask("Floor"));
         }
 
@@ -92,11 +101,16 @@ namespace Player
             }
         }
 
+        private void OnPlayerResetMovement(params object[] parameters)
+        {
+            _canMove = true;
+        }
+
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(_featPosition, 0.2f);
+            Gizmos.DrawWireSphere(FeatPosition, 0.2f);
         }
 #endif
     }

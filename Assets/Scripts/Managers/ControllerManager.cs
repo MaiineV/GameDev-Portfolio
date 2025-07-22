@@ -1,39 +1,52 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Controller
 {
-    public enum InputType
+    public enum InputNames
     {
         Move,
         Jump,
-        Interact
+        Interact,
+        PassDialogue
+    }
+
+    public enum ActionMapType
+    {
+        Player,
+        UI
     }
 
     public static class ControllerManager
     {
         private static readonly InputSystem_Actions _inputSystem;
+        private static readonly Dictionary<ActionMapType, InputActionMap> ActionMaps = new();
 
-        private static InputActionMap _actionMap;
-
+        private static ActionMapType _currentMapType;
+        
         static ControllerManager()
         {
             _inputSystem = new InputSystem_Actions();
 
-            _inputSystem.Enable();
+            ActionMaps[ActionMapType.Player] = _inputSystem.Player;
+            ActionMaps[ActionMapType.UI]     = _inputSystem.UI;
 
-            _actionMap = _inputSystem.asset.FindActionMap("Player", throwIfNotFound: true);
+            ActionMaps[ActionMapType.UI].Disable();
+            ActionMaps[ActionMapType.Player].Enable();
+            _currentMapType = ActionMapType.Player;
         }
 
         /// <summary>
-        /// You have to define the Input Type (Move, Look, etc.) <see cref="InputType" />,
+        /// You have to define the Input Type (Move, Look, etc.) <see cref="InputNames" />,
         /// and an <see cref="Action" /> function with an <see cref="InputAction.CallbackContext" /> by params.
         /// </summary>
-        public static void AddPerformanceEvent(InputType inputType, Action<InputAction.CallbackContext> action)
+        public static void AddPerformanceEvent(InputNames inputNames,
+            Action<InputAction.CallbackContext> action, ActionMapType actionMapType = ActionMapType.Player)
         {
-            var actionName = inputType.ToString();
-            var inputAction = _actionMap.FindAction(actionName, throwIfNotFound: false);
+            var actionName = inputNames.ToString();
+            var inputAction = ActionMaps[actionMapType].FindAction(actionName, throwIfNotFound: false);
             if (inputAction == null)
             {
                 Debug.LogWarning($"Can't find \"{actionName}\" in the ActionMap \"Player\".");
@@ -44,13 +57,14 @@ namespace Controller
         }
 
         /// <summary>
-        /// You have to define the Input Type (Move, Look, etc.) <see cref="InputType" />,
+        /// You have to define the Input Type (Move, Look, etc.) <see cref="InputNames" />,
         /// and an <see cref="Action" /> function with an <see cref="InputAction.CallbackContext" /> by params.
         /// </summary>
-        public static void AddCancelEvent(InputType inputType, Action<InputAction.CallbackContext> action)
+        public static void AddCancelEvent(InputNames inputNames, 
+            Action<InputAction.CallbackContext> action, ActionMapType actionMapType = ActionMapType.Player)
         {
-            var actionName = inputType.ToString();
-            var inputAction = _actionMap.FindAction(actionName, throwIfNotFound: false);
+            var actionName = inputNames.ToString();
+            var inputAction = ActionMaps[actionMapType].FindAction(actionName, throwIfNotFound: false);
             if (inputAction == null)
             {
                 Debug.LogWarning($"Can't find \"{actionName}\" in the ActionMap \"Player\".");
@@ -61,10 +75,11 @@ namespace Controller
         }
 
         //TODO: Add remove for each case
-        public static void RemoveEvent(InputType inputType, Action<InputAction.CallbackContext> action)
+        public static void RemoveEvent(InputNames inputNames, Action<InputAction.CallbackContext> action,
+            ActionMapType actionMapType = ActionMapType.Player)
         {
-            var actionName = inputType.ToString();
-            var inputAction = _actionMap.FindAction(actionName, throwIfNotFound: false);
+            var actionName = inputNames.ToString();
+            var inputAction = ActionMaps[actionMapType].FindAction(actionName, throwIfNotFound: false);
             if (inputAction == null)
             {
                 Debug.LogWarning($"Can't find \"{actionName}\" in the ActionMap \"Player\".");
@@ -72,6 +87,16 @@ namespace Controller
             }
 
             inputAction.performed -= action;
+        }
+
+        public static void ChangeInputMap(ActionMapType newMapType)
+        {
+            if (_currentMapType == newMapType)
+                return;
+
+            ActionMaps[_currentMapType].Disable();
+            ActionMaps[newMapType].Enable();
+            _currentMapType = newMapType;
         }
     }
 }

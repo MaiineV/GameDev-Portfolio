@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public enum EventName
 {
-    
+    OnPlayerResetMovement
 }
 
 public static class EventManager
